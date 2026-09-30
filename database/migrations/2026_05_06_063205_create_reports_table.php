@@ -10,18 +10,18 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('reports', function (Blueprint $table) {
-            $table->id();
-            // foreignId = Menyambungkan laporan ini ke user yang sedang login
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('judul');        // Misalnya: "Jalan rusak dekat Ampera"
-            $table->text('deskripsi');      // Penjelasan panjang
-            $table->string('foto')->nullable(); // Foto bukti (nullable = boleh kosong)
-            $table->enum('status', ['pending', 'diproses', 'selesai'])->default('pending');
-            $table->timestamps(); // Otomatis bikin kolom created_at dan updated_at
-        });
-    }
+{
+    Schema::create('reports', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->string('judul');
+        $table->text('deskripsi');
+        // Gunakan string biasa, defaultnya huruf BESAR semua biar kompak
+        $table->string('status')->default('PENDING');
+        $table->string('foto')->nullable(); // nullable artinya boleh kosong (opsional)
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

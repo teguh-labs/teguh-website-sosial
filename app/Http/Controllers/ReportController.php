@@ -8,24 +8,32 @@ use Illuminate\Support\Facades\Auth; // Untuk cek siapa yang lagi login
 
 class ReportController extends Controller
 {
-    // Fungsi untuk menyimpan laporan (POST)
     public function store(Request $request)
     {
-        // 1. Validasi: Pastikan judul dan deskripsi nggak kosong
+        // 1. Validasi (tambahin aturan buat foto)
         $request->validate([
-            'judul' => 'required',
-            'deskripsi' => 'required',
+            'judul' => 'required|min:5',
+            'deskripsi' => 'required|min:10',
+            'foto' => 'nullable|image|mimes:jpg,png,jpeg|max:2048', // Maksimal 2MB
         ]);
 
-        // 2. Simpan ke database pakai konsep OOP
-        Report::create([
-            'user_id' => Auth::id(), // Otomatis ngambil ID user yang login
+        // 2. Logika simpan foto
+        $namaFoto = null;
+        if ($request->hasFile('foto')) {
+            // Simpan foto ke folder storage/app/public/laporan
+            $path = $request->file('foto')->store('laporan', 'public');
+            $namaFoto = $path;
+        }
+
+        // 3. Simpan data ke database
+        \App\Models\Report::create([
+            'user_id' => Auth::id(),
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
-            // (Foto kita skip dulu untuk tes tahap pertama biar gampang)
+            'foto' => $namaFoto, // Bakal berisi path foto atau null kalau kosong
+            'status' => 'PENDING',
         ]);
 
-        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
-        return back()->with('pesan', 'Mantap! Laporan berhasil dikirim.');
+        return redirect()->back()->with('pesan', 'Laporan warga Plaju sudah masuk sistem!');
     }
 }
